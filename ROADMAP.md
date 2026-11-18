@@ -36,13 +36,12 @@ and [help wanted](https://github.com/yoink-labs/split/issues?q=is%3Aissue%20is%3
   ([#7](https://github.com/yoink-labs/split/pull/7)).
 
 - **Member charges and web app.** Open a member, charge, receipt or another participant on iOS and the web. Join, claim and settle at [Split](https://split.yoinklabs.dev).
-
-## In progress
-
-- **Splitwise parity, Liquid Glass and iPhone Duo (0.5).** A home dashboard,
-  friends, comments and likes, search, insights charts, multiple payers and
-  archived groups ([#6](https://github.com/yoink-labs/split/pull/6),
-  [plan](https://github.com/yoink-labs/split/blob/ade/splitwise-website-login/docs/SPLITWISE_PARITY.md)).
+- **Splitwise parity, Liquid Glass and iPhone Duo (0.7).** A home dashboard,
+  friends, comments and likes, search, insights charts, five split modes,
+  receipt claimant chips, multiple payers, archived groups, Liquid Glass and
+  the iPhone Duo layouts
+  ([#6](https://github.com/yoink-labs/split/pull/6),
+  [plan](https://github.com/yoink-labs/split/blob/main/docs/SPLITWISE_PARITY.md)).
 
 ## Planned
 

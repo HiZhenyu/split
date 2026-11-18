@@ -42,6 +42,68 @@ On the simulator, a signed-in QA account opened group settings, changed a defaul
 
 Authenticated production checks covered saved payment details, shared weights, schedule creation/cancellation, and repeat import. Worker tests cover concurrent cron invocations, month-end dates, historical conversion, membership permissions, atomic import rollback, claim merging and deterministic transfer ordering. No money was sent. [Screenshots](../screenshots/README.md)
 
+## Splitwise parity, Liquid Glass and iPhone Duo in 0.7
+
+The 0.7 baseline is the Splitwise web client at `secure.splitwise.com` as seen on
+17 November 2026, plus the iPhone Duo simulator in Xcode 27.2. The app builds
+against the iOS 27.2 SDK, keeps iOS 18 as the deployment target, and uses system
+containers only for navigation and bars.
+
+| Flow | Result on the simulator |
+| --- | --- |
+| Home dashboard | Per-currency totals, person balances, group cards, a nudge share link and the recent ledger render in one column on the outer display and two columns on the inner display. The glass action cluster stays intrinsic; no button consumes a row. |
+| Groups | On the inner display the sidebar shows full group names with balances stacked under each name; the detail column keeps the action cluster to three compact pills and a vertical Liquid Glass toolbar. |
+| Friends | Aggregated people names stay full-width, with each currency on its own small line. A person without a one-to-one tab offers Add expense, which creates the tab and opens the composer. |
+| Activity | Month sections, All/Expenses/Payments filters, group filter, search, likes and comment counts work. Likes and comments were added and persisted in demo mode; live behaviour is covered by Worker tests. |
+| Expense composer | Amount, description, category, notes, payers, five split modes, receipt line items, save and save-another are present. A saved ARS 45.50 expense updated the group ledger and balances. |
+| Expense detail | Receipt totals, item claims, shares, notes, likes and comments render as cards. Claiming the open provoleta changed the item's claimants and removed it from the open total. |
+| Settle up | A suggested transfer prefilled the amount and recorded a settlement; the ledger incremented and the group balance updated. |
+| Group settings | Group name, currency lock, simplify toggle, people, default shares, payment handles, CSV import/export, archive and leave are present. Saving details reports "Group details saved." |
+| Group balances | Per-currency balances, suggested payments and the Settle action work; ARS and USD are shown separately. |
+| Search | Searching "Harris" returns both shared groups, the person result and matching expenses. It works pushed from You and as a sheet from Activity/Home. |
+| Insights | The all-groups total, largest category, average, daily bars for a single month, category shares, paid/share/net rows and the six-month chart when data spans months render correctly. |
+| Dark mode | All pages were checked in dark appearance; the hero stays dark evergreen with lime/coral values and glass cards remain legible. |
+| Dynamic Type | Accessibility Extra Large was checked on the inner display. Display and amount fonts scale up to a capped factor, body copy uses semantic styles, and content scrolls rather than clipping. |
+| iPhone Duo poses | Outer portrait, open-wide, open-tall and book/tabletop folds were checked. The system moves the tab bar between the 84 pt vertical bar and the horizontal bottom bar; groups and friends use two panes when regular width is available and collapse on the cover. |
+
+Verification commands:
+
+```sh
+npm run typecheck --prefix worker
+npm test --prefix worker          # 6 files, 39 tests
+node --test cli/test/*.test.mjs   # 2 tests
+xcodegen generate
+xcodebuild build -project Split.xcodeproj -scheme Split \
+  -destination 'platform=iOS Simulator,name=iPhone 17' CODE_SIGNING_ALLOWED=NO
+ade apple test --scheme Split     # 25 tests
+```
+
+The simulator does not render the fold's curved division region, so fold
+avoidance for custom headers is confirmed by layout inspection rather than a
+visible curve. No physical iPhone Duo was available; pose-dependent behaviour is
+reported as simulator-verified, not device-verified.
+
+### Design pass and receipt chips
+
+The final 0.7 pass tightened every screen around the same hierarchy: one ink
+hero, glass secondary surfaces, compact intrinsic actions, and a single
+drifting background. The person-balance sign bug found in the pass is fixed:
+the Home and Friends screens now show what you owe and what you are owed from
+the same perspective as the group totals. A group that turns off "Simplify
+payments" uses the direct transfer plan instead of the minimised plan.
+
+Receipt review was exercised with a synthetic café receipt on the simulator.
+On-device Vision recognized four items, tax and tip, and the new composer chips
+were used to mark who shared an item. Saving the receipt produced three open
+items and an exact split; after saving, the Purchases section showed claimant
+chips and the Claim sheet changed the split by ARS 24,250.00, with the open
+total clearing. The invite screen builds a QR and short-code card; demo mode
+correctly shows the signed-out error instead of generating a fake link.
+
+The system TabView is kept (no `.id(size)` workaround). Folding with an open
+expense sheet preserved the sheet and the selected group in simulator checks;
+the custom navigation shell was discarded because it covered the system
+toolbar. The new suite runs 25 iOS tests, 39 Worker tests and 2 CLI tests.
 ## Member activity on iOS
 
 From You, Alex opened a receipt-sharing group, checked the original charge, opened its attached café receipt and selected Guest from Split with. Guest's statement showed the same charge and Guest's own share. Back returned to Guest after reopening the expense. The account group picker also exposed Alex's other shared trips at Accessibility Large.

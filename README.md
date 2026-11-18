@@ -1,8 +1,25 @@
 # Split by Yoink Labs
 
+# Split by Yoink Labs
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-Split is a free web, iPhone and iPad app for tracking shared expenses. Start a trip, household, or two-person tab, record who paid, and see who owes whom. Groups can settle in one currency using historical or manual rates. Open source under MIT.
+Split is a free web, iPhone, iPad and iPhone Duo app for tracking shared
+expenses. Start a trip, household, or two-person tab, record who paid, and see
+who owes whom. Groups can settle in one currency using historical or manual
+rates. Open source under MIT.
+
+It is also a complete, no-paywall take on the Splitwise experience: a dashboard
+across every group, friends and one-to-one tabs, itemized receipts, comments and
+likes, search, charts, multi-currency settlement, member statements and a full
+activity feed. Every feature Splitwise puts behind Pro is free here.
+
+The iOS app is native SwiftUI, not an Ionic or web-wrapper project. It builds
+against the iOS 27.2 SDK with an iOS 18 deployment target and adopts the iPhone
+Duo layouts through standard SwiftUI containers: a system tab bar that moves to
+the vertical axis on the inner display, `NavigationSplitView` list/detail
+screens, and adaptive grids that grow from one to two columns with the available
+width. The web client shares the same Worker, groups and cent allocations.
 
 [Join the TestFlight beta](https://testflight.apple.com/join/YX8W6bCx) · [Contribute](#contributing) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELOG.md) · [Release and signing](docs/TESTFLIGHT.md) · [Simulator audit](docs/USABILITY.md) · [Screenshot gallery](screenshots/README.md)
 
@@ -11,6 +28,34 @@ Split is a free web, iPhone and iPad app for tracking shared expenses. Start a t
   <img src="screenshots/split-drilldown/ios-receipt-dark.png" width="205" alt="Parrilla dinner with its restaurant receipt and claimed items">
   <img src="screenshots/split-drilldown/ios-split-with-light.png" width="205" alt="The four diners and their individual shares">
 </p>
+
+## What’s new in 0.7
+
+- **Member statements.** Tap **You** or any group member to see their charges
+  across shared groups. A person with several groups gets a picker, and the
+  Split with rows on a charge open another member directly.
+- **Home dashboard.** Per-currency totals for what you owe and are owed, every
+  open balance by person, group cards, recent activity and a shareable balance
+  reminder. Nothing is hidden behind an upgrade screen.
+- **Groups and friends.** Groups use a list/detail layout on iPad and iPhone Duo
+  and collapse to a stack on a folded phone. Friends combine balances from every
+  shared group and can start a one-to-one tab without creating a visible group.
+- **A complete expense composer.** Multiple payers, notes, categories, the date,
+  receipt photos and itemized claims, plus five split modes: equally, exact
+  amounts, percentages, shares and equal-with-adjustments.
+- **Social ledger.** Comments and likes on every expense, with author-only
+  deletion, month-grouped activity, group and type filters.
+- **Free Pro features.** Global search across groups, people and expenses, and
+  Insights charts for month, category and person.
+- **iPhone Duo.** The tab bar moves to the 84 pt vertical bar on the inner
+  display, group and friend lists become two-pane, and the dashboard uses an
+  adaptive grid across folds, Split View and every orientation.
+- **A living surface.** Warm paper and evergreen ink, a slowly drifting aurora
+  background, Liquid Glass cards and controls on iOS 26+, and compact action
+  clusters instead of full-width buttons. Light, dark, Dynamic Type and Reduce
+  Motion are all first-class.
+- **A web client.** The same groups, expenses, receipts and member statements
+  are available in the browser at `split.yoinklabs.dev`.
 
 ## Using Split
 
@@ -173,4 +218,3 @@ Never commit `.dev.vars`, `.env` files or keys. Report vulnerabilities privately
 ## Roadmap
 
 See [ROADMAP.md](ROADMAP.md) for what is shipped, in progress and planned, and [CHANGELOG.md](CHANGELOG.md) for each release.
-

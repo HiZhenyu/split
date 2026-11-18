@@ -15,9 +15,11 @@ final class LedgerTests: XCTestCase {
         let row=try XCTUnwrap(LedgerCSV.parse(csv,defaultCurrency:"ARS").first)
         XCTAssertEqual(row.title,"Lunch, downtown");XCTAssertEqual(row.payer,"Alex");XCTAssertEqual(row.splits.map(\.amount),[700,300])
         XCTAssertThrowsError(try LedgerCSV.parse(csv.replacingOccurrences(of:"-3.00",with:"2.00"),defaultCurrency:"ARS"))
-        let group=Fixtures.snapshot().groups[0]
-        let exported=LedgerCSV.export(Fixtures.snapshot().entries,group:group)
-        XCTAssertEqual(try LedgerCSV.parse(exported,defaultCurrency:"ARS").count,3)
+        let snapshot=Fixtures.snapshot()
+        let group=snapshot.groups[0]
+        let groupEntries=snapshot.entries.filter{$0.groupID==group.id}
+        let exported=LedgerCSV.export(groupEntries,group:group)
+        XCTAssertEqual(try LedgerCSV.parse(exported,defaultCurrency:"ARS").count,groupEntries.count)
         let splid="Date;Description;Amount;Paid by;Participants\n2025-02-01;Ride;10.01;Alex;Alex,Maya"
         XCTAssertEqual(try LedgerCSV.parse(splid,defaultCurrency:"USD")[0].splits.map(\.amount),[501,500])
     }
@@ -78,7 +80,7 @@ final class LedgerTests: XCTestCase {
         let me = group.members[0]
         let guest = group.members[1]
         snapshot.groups[1].members[1].name = guest.name
-        XCTAssertEqual(snapshot.memberships(user: me.userID, groupID: group.id, seatID: me.id).count, 2)
+        XCTAssertEqual(snapshot.memberships(user: me.userID, groupID: group.id, seatID: me.id).count, snapshot.groups.count)
         XCTAssertEqual(snapshot.memberships(user: nil, groupID: group.id, seatID: guest.id).map { $0.0.id }, [group.id])
         let payerOnly = LedgerEntry(groupID: group.id, title: "Gift", amount: 800, currency: "USD",
                                     paidBy: guest.id, splits: [Portion(memberID: me.id, amount: 800)])

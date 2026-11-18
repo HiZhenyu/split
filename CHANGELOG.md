@@ -8,12 +8,32 @@ Versions match the iOS app's marketing version. The TestFlight build number
 is noted next to each release. The CLI is versioned separately with
 `split-v*` tags.
 
-## [Unreleased]
+## [0.7.0] - 2026-11-18
+
+TestFlight build 8 (pending).
 
 ### Added
 
 - Group-scoped member statements and linked receipt participants on iOS, including placeholders.
 - A mobile web app for shared groups, expense entry, photographed receipts, item claims, balances and payments.
+- The Splitwise-parity iOS surface: a cross-group dashboard, friends and
+  one-to-one tabs, comments and likes, global search, Insights charts, multiple
+  payers, five split modes, archived groups and a shareable balance reminder.
+- Receipt claimant chips in the composer and saved expense, with on-device
+  Vision item review, tax/tip allocation and a chip-based claim sheet.
+- QR-code and short-code invite cards, with personal placeholder links.
+- Liquid Glass hierarchy over a drifting aurora background, compact intrinsic
+  action clusters, and two-column layouts on regular width.
+- iPhone Duo cover, open-wide and open-tall layouts through the system tab and
+  split containers.
+
+### Fixed
+
+- Home and Friends balances now agree with the user’s own group totals instead
+  of showing a person’s group balance as money owed to the user.
+- “Simplify payments” off now uses a direct transfer plan.
+- A compact phone group list no longer leaves a large hole above its first row,
+  and compact expense rows keep both title and amount visible.
 
 - Split is open source under the MIT license, with contributing guide, code
   of conduct, security policy, issue and pull request templates
