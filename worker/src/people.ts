@@ -62,17 +62,28 @@ export async function saveProfile(db: D1Database, profile: Profile) {
   ]);
 }
 
-export async function refreshIdentity(env: Env & {CLERK_SECRET_KEY:string}, userID:string) {
+export async function refreshIdentity(env: Env, userID:string) {
   const recent=await env.DB.prepare(`SELECT p.user_id FROM split_profiles p WHERE p.user_id=? AND p.refreshed_at>?
     AND NOT EXISTS (SELECT 1 FROM member_contacts c JOIN members m ON m.id=c.member_id
       LEFT JOIN member_aliases a ON a.member_id=m.id WHERE c.email=p.email AND m.user_id IS NULL AND a.member_id IS NULL)`)
     .bind(userID,Date.now()-300000).first();
   if (recent) return;
   // Always verify current ownership before claiming an email-addressed seat.
-  const response = await fetch('https://api.clerk.com/v1/users/' + encodeURIComponent(userID), {
-    headers:{Authorization:'Bearer '+env.CLERK_SECRET_KEY}, redirect:'error'
+  const request = new Request('https://api.clerk.com/v1/users/' + encodeURIComponent(userID), {
+    headers:{Authorization:'Bearer '+env.CLERK_SECRET_KEY,Accept:'application/json','User-Agent':'Split-API/0.2'},
+    redirect:'manual'
   });
-  if (!response.ok) throw new Error('Identity service unavailable');
+  let response: Response;
+  try { response = await fetch(request); }
+  catch {
+    console.warn(JSON.stringify({event:'identity_lookup_unavailable',type:'network'}));
+    return;
+  }
+  if (!response.ok) {
+    // Identity enrichment can be retried. Never claim evidence from a stale profile.
+    console.warn(JSON.stringify({event:'identity_lookup_unavailable',status:response.status}));
+    return;
+  }
   const user: ClerkUser = await response.json();
   if (user.id !== userID) throw new Error('Identity mismatch');
   await saveProfile(env.DB, verifiedProfile(user));
