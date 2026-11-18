@@ -1,3 +1,4 @@
+import { itemSplit } from './items';
 import { InputError, type Entry } from './ledger';
 
 export type Profile = {userID: string; name: string; username: string | null; email: string | null};
@@ -22,6 +23,15 @@ export function resolveEntry(entry: Entry, aliases: Map<string,string>): Entry {
   for (const split of entry.splits) {
     const id = aliases.get(split.memberID) ?? split.memberID;
     amounts.set(id, (amounts.get(id) ?? 0) + split.amount);
+  }
+  if(entry.bill) {
+    const bill={...entry.bill,items:entry.bill.items.map(i=>{
+      const seats=(i.roundingSeats??i.memberIDs).map(id=>aliases.get(id)??id);
+      const memberIDs=[...new Set(seats)];
+      return {...i,memberIDs,...(seats.length>memberIDs.length?{roundingSeats:seats}:{})};
+    })};
+    const paidBy=aliases.get(entry.paidBy)??entry.paidBy;
+    return {...entry,bill,paidBy,splits:itemSplit(bill,paidBy)};
   }
   return {...entry, paidBy: aliases.get(entry.paidBy) ?? entry.paidBy,
     splits: Array.from(amounts, ([memberID, amount]) => ({memberID, amount}))};
