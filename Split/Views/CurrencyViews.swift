@@ -44,39 +44,52 @@ struct ApproxTotal: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 3) {
-            HStack(alignment: .firstTextBaseline, spacing: 8) {
-                if needsConversion, result.missing.count < open.count {
-                    Text("≈ " + Money.text(abs(result.amount), fx.display))
-                        .font(.splitAmount(onHero ? 17 : 15, weight: .semibold))
-                        .foregroundStyle(onHero ? Palette.onHero : Palette.ink)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
-                        .contentTransition(.numericText())
-                    if result.amount != 0 {
-                        Text(result.amount > 0 ? positive : negative)
-                            .font(.caption)
-                            .foregroundStyle(onHero ? Palette.onHero.opacity(0.62) : .secondary)
-                            .lineLimit(1)
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    HStack(alignment: .firstTextBaseline, spacing: 8) {
+                        conversionSummary
                     }
-                } else if needsConversion {
-                    Text(fx.refreshing ? "Getting today’s rates…" : "Rates unavailable offline")
-                        .font(.caption)
-                        .foregroundStyle(onHero ? Palette.onHero.opacity(0.62) : .secondary)
+                    .fixedSize(horizontal: true, vertical: false)
+                    if showsMenu {
+                        Spacer(minLength: 6)
+                        ShowInMenu(onHero: onHero)
+                            .fixedSize(horizontal: true, vertical: false)
+                    }
                 }
-                Spacer(minLength: 6)
-                if showsMenu { ShowInMenu(onHero: onHero) }
+                VStack(alignment: .leading, spacing: 4) {
+                    conversionSummary
+                    if showsMenu { ShowInMenu(onHero: onHero) }
+                }
             }
             if needsConversion, result.missing.count < open.count {
                 Text(caption)
                     .font(.caption2)
                     .foregroundStyle(onHero ? Palette.onHero.opacity(0.55) : Color.secondary)
-                    .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .contain)
         .task(id: Array(open.keys).sorted().joined() + fx.display) {
             await fx.refresh(currencies: Set(open.keys), into: fx.display)
+        }
+    }
+
+    @ViewBuilder private var conversionSummary: some View {
+        if needsConversion, result.missing.count < open.count {
+            Text("≈ " + Money.text(abs(result.amount), fx.display))
+                .font(.splitAmount(onHero ? 17 : 15, weight: .semibold))
+                .foregroundStyle(onHero ? Palette.onHero : Palette.ink)
+                .fixedSize(horizontal: false, vertical: true)
+                .contentTransition(.numericText())
+            if result.amount != 0 {
+                Text(result.amount > 0 ? positive : negative)
+                    .font(.caption)
+                    .foregroundStyle(onHero ? Palette.onHero.opacity(0.62) : .secondary)
+            }
+        } else if needsConversion {
+            Text(fx.refreshing ? "Getting today’s rates…" : "Rates unavailable offline")
+                .font(.caption)
+                .foregroundStyle(onHero ? Palette.onHero.opacity(0.62) : .secondary)
         }
     }
 

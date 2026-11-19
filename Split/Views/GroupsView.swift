@@ -7,6 +7,7 @@ struct GroupsView: View {
     @State private var showCreate = false
     @State private var joining = false
     @State private var importing = false
+    @State private var presentedSheet: GroupDetailSheet?
     @State private var query = ""
     @State private var showArchived = false
 
@@ -23,7 +24,7 @@ struct GroupsView: View {
             sidebar
         } detail: {
             if let selection, let group = store.group(selection) {
-                GroupDetail(groupID: group.id)
+                GroupDetail(groupID: group.id) { presentedSheet = $0 }
             } else {
                 GroupDetailPlaceholder(showCreate: $showCreate, joining: $joining)
             }
@@ -32,6 +33,8 @@ struct GroupsView: View {
         .sheet(isPresented: $showCreate) { CreateGroupView(friend: false) }
         .sheet(isPresented: $joining) { JoinGroupView { id in selection = id } }
         .sheet(isPresented: $importing) { SplitwiseImportView() }
+        // The split view can recreate its detail column as the device folds.
+        .sheet(item: $presentedSheet) { $0.content }
         .onChange(of: store.joinedGroupID) { _, id in
             if let id { selection = id; store.joinedGroupID = nil }
         }
@@ -165,32 +168,18 @@ struct GroupSidebarRow: View {
                 .background(Palette.lime.opacity(0.55), in: RoundedRectangle(cornerRadius: Radius.badge))
                 .foregroundStyle(Palette.ink)
                 .accessibilityHidden(true)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(summary.group.name)
-                    .font(.body.weight(.semibold))
-                    .foregroundStyle(Palette.ink)
-                    .lineLimit(1)
-                Text("\(summary.group.members.count) people · \(kind)")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            VStack(alignment: .trailing, spacing: 2) {
-                if balances.isEmpty {
-                    Text("Settled up")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(Palette.evergreen)
-                } else {
-                    BalanceLabel(amount: balances[0].1, currency: balances[0].0, positive: "you’re owed", negative: "you owe")
-                    if balances.count > 1 {
-                        Text("+\(balances.count - 1) more")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: Spacing.s) {
+                    identity.fixedSize(horizontal: true, vertical: false)
+                    Spacer(minLength: 0)
+                    balance(alignment: .trailing).fixedSize(horizontal: true, vertical: false)
                 }
+                VStack(alignment: .leading, spacing: Spacing.xs) {
+                    identity
+                    balance(alignment: .leading)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .layoutPriority(1)
             Image(systemName: "chevron.right")
                 .font(.footnote.weight(.semibold))
                 .foregroundStyle(.tertiary)
@@ -199,6 +188,35 @@ struct GroupSidebarRow: View {
         .padding(.vertical, Spacing.xxs)
         .frame(minHeight: HitTarget.minimum)
         .contentShape(Rectangle())
+    }
+
+    private var identity: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(summary.group.name)
+                .font(.body.weight(.semibold))
+                .foregroundStyle(Palette.ink)
+            Text("\(summary.group.members.count) people · \(kind)")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+        .fixedSize(horizontal: false, vertical: true)
+    }
+
+    private func balance(alignment: HorizontalAlignment) -> some View {
+        VStack(alignment: alignment, spacing: 2) {
+            if let first = balances.first {
+                BalanceLabel(amount: first.1, currency: first.0, positive: "you’re owed", negative: "you owe", alignment: alignment)
+                if balances.count > 1 {
+                    Text("+\(balances.count - 1) more")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            } else {
+                Text("Settled up")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Palette.evergreen)
+            }
+        }
     }
 }
 
